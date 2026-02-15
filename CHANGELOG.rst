@@ -3,7 +3,7 @@ Renode changelog
 
 This document describes notable changes to the Renode framework.
 
-1.16.1 - 2026.01.15
+1.16.1 - 2026.02.15
 -------------------
 
 Added and improved architecture support:
