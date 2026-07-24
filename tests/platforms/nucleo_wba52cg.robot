@@ -81,13 +81,13 @@ Should have Working EXTI
 
     Start Emulation
 
-    Assert LED State               false
-
-    Execute Command                ${USER_BUTTON} PressAndRelease
     Assert LED State               true
 
     Execute Command                ${USER_BUTTON} PressAndRelease
     Assert LED State               false
+
+    Execute Command                ${USER_BUTTON} PressAndRelease
+    Assert LED State               true
 
 SPI Should Work In Polling Mode
     Run SPI Test Case               ${SPI_POLLING}
