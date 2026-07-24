@@ -165,7 +165,7 @@ LED Tester Assert Should Precisely Pause Emulation
 
     Assert LED State         true  pauseEmulation=true
     Emulation Should Be Paused At Time  00:00:00.000115
-    PC Should Be Equal       0x8002a48  # this is the next instruction after STR that writes to BSRR in gpio_stm32_port_set_bits_raw
+    PC Should Be Equal       0x800289a  # this is the next instruction after STR that writes to BSRR in gpio_stm32_port_set_bits_raw
 
     Assert LED State         false  pauseEmulation=true
     Emulation Should Be Paused At Time  00:00:01.000157
