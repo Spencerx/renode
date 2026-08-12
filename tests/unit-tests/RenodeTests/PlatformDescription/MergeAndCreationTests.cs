@@ -906,7 +906,7 @@ newCpu: Antmicro.Renode.UnitTests.Mocks.MockCPU @ sysbus 2
         public void ShouldNotDetectCycleInPerCoreRegistration()
         {
             var source = @"
-core1_nvic: IRQControllers.NVIC @ sysbus new Bus.BusPointRegistration { 
+core1_nvic: IRQControllers.NVIC @ sysbus new Bus.BusPointRegistration {
     address: 0xE000E000;
     cpu: cpu1
 }
@@ -1313,7 +1313,7 @@ peripheral: Antmicro.Renode.UnitTests.Mocks.EmptyPeripheral
             var source = @"
 peripheral: Antmicro.Renode.UnitTests.Mocks.EmptyPeripheral @ {
     sysbus <0x100, +0x100>;
-    sysbus <0x150, +0x100>    
+    sysbus <0x150, +0x100>
 }";
 
             var exception = Assert.Throws<ParsingException>(() => ProcessSource(source));
