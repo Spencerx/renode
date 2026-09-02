@@ -299,6 +299,25 @@ static renode_error_t *invoke_callback(renode_connection_t *conn, uint16_t id, a
         free(sysbus_event);
 
         return err;
+    case CUSTOM_COMMAND_CALLBACK:
+        assert_response(size >= 1, ERRMSG_UNEXPECTED_RESPONSE_PAYLOAD_SIZE);
+
+        // We need to insert null byte at the end of the string to make it valid in C
+        renode_custom_command_event_data_t *command_data = xmalloc(size+1);
+        memcpy(command_data, data, size);
+        size_t last_string_index = size - sizeof(command_data->time);
+        command_data->command[last_string_index] = '\0';
+
+        renode_custom_command_response_data_t * response = (renode_custom_command_response_data_t *)commands[ed](NULL, command_data);
+
+        char *message = (response == NULL) ? "Callback returned nullptr" : response->response_string;
+        bool command_valid = (response == NULL) ? false : response->command_valid;
+
+        result = renode_connection_send_message(conn, id,
+                                              RESPONSE_HEADER(cmd, command_valid ? TYPE_SUCCESS : TYPE_ERROR),
+                                              {message, strlen(message)});
+        free(response);
+        return result;
     default:
         return renode_connection_send_message(conn, id, RESPONSE_HEADER(cmd, TYPE_INVALID_COMMAND));
     }
@@ -451,6 +470,32 @@ renode_error_t *renode_register_time_elapsed_callback(renode_t *renode, void *us
         REQUEST_HEADER(TIME_ELAPSED_CALLBACK),
         {&ed, sizeof(ed)},
     );
+}
+
+typedef enum {
+    CUSTOM_COMMAND_REGISTER,
+} custom_command_operation_t;
+
+typedef struct {
+    struct __attribute__((packed)) {
+        uint8_t command;
+    } header;
+    char command_string[];
+} custom_command_command_t;
+
+renode_error_t *renode_register_custom_command_callback(renode_t *renode, void *user_data, renode_custom_command_callback_t callback)
+{
+    int32_t ed;
+    custom_command_command_t cmd = {
+        .header = {
+            .command = CUSTOM_COMMAND_REGISTER,
+        },
+    };
+    return_error_if_fails(register_command((raw_command_t)callback, user_data, &ed));
+    return renode_connection_send_request(renode->conn, generic_response_handler, &cmd,
+                                          REQUEST_HEADER(CUSTOM_COMMAND_CALLBACK),
+                                          {&cmd.header, sizeof(cmd.header)},
+                                          {&ed, sizeof(ed)},);
 }
 
 renode_error_t *renode_get_adc(renode_machine_t *machine, const char *name, renode_adc_t **adc)
@@ -978,6 +1023,8 @@ static renode_error_t *generic_response_handler(renode_connection_t *conn, const
     case SPI:
         return NO_ERROR; // This command doesn't return any data, we only care about a successful status
     case CAN_BUS:
+        return NO_ERROR; // This command doesn't return any data, we only care about a successful status
+    case CUSTOM_COMMAND_CALLBACK:
         return NO_ERROR; // This command doesn't return any data, we only care about a successful status
     default:
         return create_fatal_error_static("Encountered a command without a response handler");

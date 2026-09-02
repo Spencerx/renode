@@ -41,6 +41,7 @@ typedef enum {
     TIME_ELAPSED_CALLBACK,
     SPI,
     CAN_BUS,
+    CUSTOM_COMMAND_CALLBACK,
 } api_command_t;
 
 // Needs to be in sync with `Antmicro.Renode.Network.ExternalControl.CommandType` in C#

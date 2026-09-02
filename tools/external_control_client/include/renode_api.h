@@ -371,6 +371,39 @@ typedef struct {
  */
 renode_error_t *renode_register_gpio_state_change_callback(renode_gpio_t *gpio, int32_t id, void *user_data, void (*callback)(void *, renode_gpio_event_data_t *));
 
+/**
+ * Custom Command event data
+ */
+ typedef struct {
+    /** Virtual time at which the event occured */
+    renode_time_t time;
+    /** Command string */
+    char command[];
+} renode_custom_command_event_data_t;
+
+/**
+ * Custom Command user data
+ */
+typedef struct {
+    /** Command valid flag */
+    bool command_valid;
+    /** Pointer to response string */
+    char response_string[];
+} renode_custom_command_response_data_t;
+
+typedef renode_custom_command_response_data_t * (*renode_custom_command_callback_t)(void *ud, renode_custom_command_event_data_t *event_data);
+
+/**
+ * @brief Function registering callback on custom command. The callback function returns a pointer to renode_custom_command_callback_t struct that it allocates.
+ *  This pointer is freed in the `invoke_callback` function.
+ *
+ * @param[in] renode Renode handle
+ * @param[in] user_data pointer to data passed to the callback when it's invoked
+ * @param[in] callback callback to be invoked when custom command is issued
+ * @return a pointer to error structure if error occurred, otherwise NULL
+ */
+renode_error_t *renode_register_custom_command_callback(renode_t *renode, void *user_data, renode_custom_command_callback_t callback);
+
 
 /* CAN */
 

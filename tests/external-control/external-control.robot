@@ -431,3 +431,20 @@ Should Run Bus Peripheral Sample As Counter
     Wait For Log Entry              does not implement WriteByte callback, ignoring write  startEmulation=false
     Execute Command                 sysbus ReadQuadWord 0x2000
     Wait For Log Entry              does not implement ReadQuadWord callback, returning 0  startEmulation=false
+
+Should Run Custom Command Sample
+    [Tags]                        exclude_windows
+    [Timeout]                     60
+    Create Log Tester             1
+    Build Sample                  custom_command
+    ${proc}=                      Start Sample  custom_command  ${PORT}
+
+    Execute Command               logLevel -1 ${SERVER_NAME}
+    Wait For Log Entry            Attaching CustomCommand callback  startEmulation=False
+
+    ${response} =                 Execute Command      ${SERVER_NAME} SendCustomCommand "demo ping"
+    Should Contain                ${response}  demo pong
+    ${response} =                 Execute Command      ${SERVER_NAME} SendCustomCommand "demo rev part"
+    Should Contain                ${response}  demo rev trap
+    ${response} =                 Run Keyword And Expect Error   *   ${SERVER_NAME} SendCustomCommand "command not defined"
+    Should Contain                ${response}   command not defined

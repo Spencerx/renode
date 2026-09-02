@@ -59,6 +59,17 @@ namespace Antmicro.Renode.Network
             Disconnect(State.Disposed);
         }
 
+        public String SendCustomCommand(String command)
+        {
+            if(isClient)
+            {
+                throw new RecoverableException("This command is supported only in server mode");
+            }
+            var customCommand = commandHandlers.GetHandler(Command.CustomCommand) as CustomCommand;
+            var timestamp = EmulationManager.Instance.CurrentEmulation.MasterTimeSource.ElapsedVirtualTime.TotalNanoseconds;
+            return customCommand.Send(command, timestamp);
+        }
+
         public ICommand GetCommandHandler(Command command)
         {
             return commandHandlers.GetHandler(command);
@@ -125,6 +136,7 @@ namespace Antmicro.Renode.Network
                 commandHandlers.Register(new SystemBus(this));
                 commandHandlers.Register(new CheckVersion(this));
                 commandHandlers.Register(new CANBus(this));
+                commandHandlers.Register(new CustomCommand(this));
 
                 var getMachineHandler = new GetMachine(this);
                 Machines = getMachineHandler;
