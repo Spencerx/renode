@@ -17,6 +17,8 @@ Should Boot HSS
     Prepare Machine
 
     ${hss}=                   Create Terminal Tester          ${UART_HSS}
+    Create Terminal Tester    ${UART}
+    SetDefaultTester          ${hss}
 
     Start Emulation
 
