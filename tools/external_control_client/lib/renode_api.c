@@ -164,10 +164,26 @@ renode_error_t *renode_disconnect_ex(renode_t **renode, bool blocking)
 
 #define MAX_CALLBACK_COUNT 1024
 
+typedef void *(*raw_command_t)(void*, void*);
 typedef void (*raw_callback_t)(void *, void *);
+// Both lists use the same indexes, that's why we don't need separate count for commands
+static raw_command_t commands[MAX_CALLBACK_COUNT];
 static raw_callback_t callbacks[MAX_CALLBACK_COUNT];
 static void *callback_user_data[MAX_CALLBACK_COUNT];
 static int32_t callbacks_count;
+
+static renode_error_t *register_command(raw_command_t command, void *user_data, int32_t *ed)
+{
+    assert_msg(callbacks_count < MAX_CALLBACK_COUNT, "Cannot register any more callbacks");
+
+    commands[callbacks_count] = command;
+    callback_user_data[callbacks_count] = user_data;
+
+    *ed = callbacks_count;
+    callbacks_count += 1;
+
+    return NO_ERROR;
+}
 
 static renode_error_t *register_callback(raw_callback_t callback, void *user_data, int32_t *ed)
 {
